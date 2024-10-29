@@ -4,6 +4,10 @@ const PORT = 8080;
 
 app.set("view engine", "ejs");
 
+const generateRandomString = function() {
+  let random = Math.random().toString(36);
+   return random.slice(2, 8);
+};
 app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
@@ -12,8 +16,10 @@ const urlDatabase = {
 };
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  let shortId = generateRandomString();
+  urlDatabase[shortId] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${shortId}`); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls", (req, res) => {
@@ -29,6 +35,11 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {id: req.params.id, longURL: urlDatabase[req.params.id]};
   res.render("urls_show", templateVars)
 });
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+})
 
 
 app.get("/", (req, res) => {
@@ -47,7 +58,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const generateRandomString = function() {
-  let random = Math.random().toString(36);
-   return random.slice(2, 8);
-};
