@@ -23,15 +23,12 @@
           <button type="submit" class="btn btn-primary">Logout</button> 
           </form>
         <%} else { %>
-          <form method="POST" action="/login">
-          <input
-            class="text-center"
-            type="text"
-            name="username"
-            placeholder="Username"
-            style="width: 300px; margin: 2em"/>
+          <form method="GET" action="/login">
            <button type="submit" class="btn btn-primary">Login</button></form>
          <%}%>
+         <form method="GET" action="/register">
+          <button type="submit" class="btn btn-primary">Register</button>
+         </form>
       </div>
     </div>
   </nav>
