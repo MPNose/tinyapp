@@ -80,7 +80,15 @@ app.post("/login", (req, res) => {
   };
   res.cookie('username', req.body.username);
   res.redirect("/urls");
-})
+});
+
+app.post("/logout", (req, res) => {
+  const templateVars = {
+    username: req.cookies['username']
+  };
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
 
 app.get("/", (req, res) => {
   const templateVars = {
