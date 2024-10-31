@@ -109,18 +109,41 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// app.get("/urls/:id", (req, res) => {
+//   if (!req.cookies['userId']) {
+//     return res.send('You need to be logged in to see URLs');
+//   }
+//   if (req.cookies['userId'] !== urlDatabase[req.params.id].userID) {
+//     return res.status(401).send('This URL does not belong to you');
+//   }
+//   const templateVars = {
+//     user: users[req.cookies.userId],
+//     id: req.params.id, 
+//     longURL: urlDatabase[req.params.id].longURL};
+//   res.render("urls_show", templateVars)
+// });
 app.get("/urls/:id", (req, res) => {
+  const urlData = urlDatabase[req.params.id];
+  
+  if (!urlData) {
+    return res.status(404).send('URL not found');
+  }
+
   if (!req.cookies['userId']) {
     return res.send('You need to be logged in to see URLs');
   }
-  if (req.cookies['userId'] !== urlDatabase[req.params.id].userID) {
+  
+  if (req.cookies['userId'] !== urlData.userID) {
     return res.status(401).send('This URL does not belong to you');
   }
+  
   const templateVars = {
     user: users[req.cookies.userId],
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id].longURL};
-  res.render("urls_show", templateVars)
+    longURL: urlData.longURL
+  };
+  
+  res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
@@ -141,7 +164,7 @@ app.post("/urls/:id", (req, res) => {
   }
   const id = req.params.id;
   const newLongURL = req.body.newLongURL;
-  urlDatabase[id] = newLongURL;
+  urlDatabase[id].longURL = newLongURL;
   res.redirect('/urls');
 });
 app.post("/urls/:id/delete", (req, res) => {
