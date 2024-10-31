@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const generateRandomString = function() {
   let random = Math.random().toString(36);
-   return random.slice(2, 8);
+  return random.slice(2, 8);
 };
 
 const urlDatabase = {
@@ -41,11 +41,20 @@ const getUserByEmail = function(email) {
   }
 };
 
+app.get("/", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies.userId]
+  };
+  res.send("Hello");
+});
 
 app.post("/urls", (req, res) => {
   const templateVars = {
     user: users[req.cookies.userId]
   };
+  if (!templateVars.user) {
+    return res.send("You need an account to use TinyApp");
+  }
   let shortId = generateRandomString();
   urlDatabase[shortId] = req.body.longURL;
   res.redirect(`/urls/${shortId}`); // Respond with 'Ok' (we will replace this)
@@ -62,6 +71,9 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies.userId]
   };
+  if (!templateVars.user) {
+    return res.redirect('/login');
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -74,9 +86,9 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.userId]
-  };
+  if (!Object.keys(urlDatabase).includes(req.params.id)) {
+    return res.send("The URL you have requested is not in the database");
+  }
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
@@ -120,17 +132,14 @@ app.post("/logout", (req, res) => {
   res.redirect('/login');
 });
 
-app.get("/", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.userId]
-  };
-  res.send("Hello");
-});
 
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.cookies.userId]
   };
+  if (templateVars.user) {
+    return res.redirect('/urls');
+  }
   res.render("register", templateVars);
 })
 
@@ -158,6 +167,9 @@ app.get('/login', (req, res) => {
   const templateVars = {
     user: users[req.cookies.userId]
   };
+  if (templateVars.user) {
+    return res.redirect('/urls');
+  }
   res.render('login', templateVars);
 });
 
