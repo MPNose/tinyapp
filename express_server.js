@@ -7,7 +7,7 @@ app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-let foundUser = null;
+
 
 const generateRandomString = function() {
   let random = Math.random().toString(36);
@@ -31,6 +31,16 @@ const users = {
     password: "54321",
   },
 };
+
+const getUserByEmail = function(email) {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      return user;
+    }
+  }
+};
+
 
 app.post("/urls", (req, res) => {
   const templateVars = {
@@ -95,20 +105,13 @@ app.post("/login", (req, res) => {
   if (!email || !password) {
     return res.status(403).send('You must provide an email and password to proceed');
   }
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      foundUser = user;
-    }
-      if (!foundUser) {
+  if (!getUserByEmail(email)) {
         return res.status(403).send('No user with that email found');
       }
-      if (foundUser.password !== password) {
+      if (getUserByEmail(email).password !== password) {
          return res.status(403).send('Passwords do not match');
       }
-    
-  }
-  res.cookie('userId', foundUser.id)
+  res.cookie('userId', getUserByEmail(email).id)
   res.redirect("/urls");
 });
 
@@ -137,15 +140,9 @@ app.post('/register', (req, res) => {
   if (!email || !password) {
     return res.status(400).send('You must provide an email and password.');
   }
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      foundUser = user;
-      if (foundUser) {
+  if (getUserByEmail(email)) {
         return res.status(400).send('email already in use');
       }
-    }
-  }
   const id = generateRandomString();
   const newUser = {
     id: id,
