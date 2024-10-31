@@ -1,7 +1,11 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
+
 const app = express();
 const PORT = 8080;
+const salt = bcrypt.genSaltSync(10);
+
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -26,21 +30,7 @@ const urlDatabase = {
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "a@a.com",
-    password: "12345",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "b@b.com",
-    password: "54321",
-  },
-  aj48lW: {
-    id: 'aj48lW',
-    email: 'd@d.com',
-    password: "12345"
-  }
+  
 };
 
 const urlsForUser = function(id) {
@@ -109,19 +99,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// app.get("/urls/:id", (req, res) => {
-//   if (!req.cookies['userId']) {
-//     return res.send('You need to be logged in to see URLs');
-//   }
-//   if (req.cookies['userId'] !== urlDatabase[req.params.id].userID) {
-//     return res.status(401).send('This URL does not belong to you');
-//   }
-//   const templateVars = {
-//     user: users[req.cookies.userId],
-//     id: req.params.id, 
-//     longURL: urlDatabase[req.params.id].longURL};
-//   res.render("urls_show", templateVars)
-// });
+
 app.get("/urls/:id", (req, res) => {
   const urlData = urlDatabase[req.params.id];
   
@@ -179,18 +157,19 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const email = req.body.email;
+  const email = getUserByEmail(req.body.email);
   const password = req.body.password;
   if (!email || !password) {
     return res.status(403).send('You must provide an email and password to proceed');
   }
-  if (!getUserByEmail(email)) {
+  if (!email) {
         return res.status(403).send('No user with that email found');
       }
-      if (getUserByEmail(email).password !== password) {
+      const result = bcrypt.compareSync(password, email.password)
+      if (!result) {
          return res.status(403).send('Passwords do not match');
       }
-  res.cookie('userId', getUserByEmail(email).id)
+  res.cookie('userId', email.id)
   res.redirect("/urls");
 });
 
@@ -219,11 +198,13 @@ app.post('/register', (req, res) => {
   if (getUserByEmail(email)) {
         return res.status(400).send('email already in use');
       }
+  const hash = bcrypt.hashSync(password, salt);
+  console.log(hash);
   const id = generateRandomString();
   const newUser = {
     id: id,
     email: email,
-    password: password
+    password: hash
   };
   users[id] = newUser;
   res.cookie('userId', id);
