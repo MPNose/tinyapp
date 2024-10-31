@@ -90,19 +90,31 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.userId]
-  };
-  res.cookie('username', req.body.username);
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    return res.status(403).send('You must provide an email and password to proceed');
+  }
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      foundUser = user;
+    }
+      if (!foundUser) {
+        return res.status(403).send('No user with that email found');
+      }
+      if (foundUser.password !== password) {
+         return res.status(403).send('Passwords do not match');
+      }
+    
+  }
+  res.cookie('userId', foundUser.id)
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.userId]
-  };
-  res.clearCookie('user');
-  res.redirect('/urls');
+  res.clearCookie('userId');
+  res.redirect('/login');
 });
 
 app.get("/", (req, res) => {
