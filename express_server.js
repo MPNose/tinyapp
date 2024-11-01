@@ -37,12 +37,7 @@ const urlDatabase = {
 };
 
 const users = {
-  
 };
-
-
-
-
 
 app.get("/", (req, res) => {
   const templateVars = {
@@ -71,7 +66,6 @@ app.get("/urls", (req, res) => {
     return res.send("You need to login or register in order to see URLs");
   }
   const urls = urlsForUser(req.session.userId, urlDatabase);
-  
   const templateVars = { 
     user: users[req.session.userId],
     urls, };
@@ -91,25 +85,20 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const urlData = urlDatabase[req.params.id];
-  
   if (!urlData) {
     return res.status(404).send('URL not found');
   }
-
   if (!req.session['userId']) {
     return res.send('You need to be logged in to see URLs');
   }
-  
   if (req.session['userId'] !== urlData.userID) {
     return res.status(401).send('This URL does not belong to you');
   }
-  
   const templateVars = {
     user: users[req.session.userId],
     id: req.params.id, 
     longURL: urlData.longURL
-  };
-  
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -147,6 +136,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -157,13 +147,14 @@ app.post("/login", (req, res) => {
   if (!user) {
         return res.status(403).send('No user with that email found');
       }
-      const result = bcrypt.compareSync(password, user.password)
+      const result = bcrypt.compareSync(password, user.password);
       if (!result) {
          return res.status(403).send('Passwords do not match');
       }
   req.session.userId = user.id;
   res.redirect("/urls");
 });
+
 
 app.post("/logout", (req, res) => {
   req.session.userId = null;
@@ -179,7 +170,8 @@ app.get("/register", (req, res) => {
     return res.redirect('/urls');
   }
   res.render("register", templateVars);
-})
+});
+
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
@@ -202,6 +194,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+
 app.get('/login', (req, res) => {
   const templateVars = {
     user: users[req.session.userId]
@@ -212,6 +205,7 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
 });
 
+
 app.get("/urls.json", (req, res) => {
   const templateVars = {
     user: users[req.session.userId]
@@ -219,9 +213,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
