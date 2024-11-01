@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session')
-const {getUserByEmail} = require('./helpers');
+const {getUserByEmail, urlsForUser} = require('./helpers');
 
 const app = express();
 const PORT = 8080;
@@ -40,18 +40,7 @@ const users = {
   
 };
 
-const urlsForUser = function(id) {
-  const userURLs = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      userURLs[key] = {
-        longURL: urlDatabase[key].longURL,
-        userID: urlDatabase[key].userID
-      }
-    }
-  }
-  return userURLs;
-}
+
 
 
 
@@ -81,7 +70,7 @@ app.get("/urls", (req, res) => {
   if (!req.session['userId']) {
     return res.send("You need to login or register in order to see URLs");
   }
-  const urls = urlsForUser(req.session.userId);
+  const urls = urlsForUser(req.session.userId, urlDatabase);
   
   const templateVars = { 
     user: users[req.session.userId],
