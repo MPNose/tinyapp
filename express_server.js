@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session')
+const {getUserByEmail} = require('./helpers');
 
 const app = express();
 const PORT = 8080;
@@ -52,14 +53,7 @@ const urlsForUser = function(id) {
   return userURLs;
 }
 
-const getUserByEmail = function(email) {
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
-    }
-  }
-};
+
 
 app.get("/", (req, res) => {
   const templateVars = {
@@ -151,6 +145,8 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[id].longURL = newLongURL;
   res.redirect('/urls');
 });
+
+
 app.post("/urls/:id/delete", (req, res) => {
   if (req.session['userId'] !== urlDatabase[req.params.id].userID || !req.session['userId']) {
     return res.status(401).send("You cannot delete this URL");
@@ -168,7 +164,7 @@ app.post("/login", (req, res) => {
   if (!email || !password) {
     return res.status(403).send('You must provide an email and password to proceed');
   }
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
   if (!user) {
         return res.status(403).send('No user with that email found');
       }
@@ -202,7 +198,7 @@ app.post('/register', (req, res) => {
   if (!email || !password) {
     return res.status(400).send('You must provide an email and password.');
   }
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
         return res.status(400).send('email already in use');
       }
   const hash = bcrypt.hashSync(password, salt);
