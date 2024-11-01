@@ -2,11 +2,9 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session')
 const {getUserByEmail, urlsForUser} = require('./helpers');
-
 const app = express();
 const PORT = 8080;
 const salt = bcrypt.genSaltSync(10);
-
 
 
 app.use(cookieSession({
@@ -15,15 +13,16 @@ app.use(cookieSession({
 })
 );
 
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-
 
 
 const generateRandomString = function() {
   let random = Math.random().toString(36);
   return random.slice(2, 8);
 };
+
 
 const urlDatabase = {
   b6UTxQ: {
@@ -36,8 +35,10 @@ const urlDatabase = {
   },
 };
 
+
 const users = {
 };
+
 
 app.get("/", (req, res) => {
   const templateVars = {
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
   };
   res.send("Hello");
 });
+
 
 app.post("/urls", (req, res) => {
   const templateVars = {
@@ -61,6 +63,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortId}`); 
 });
 
+
 app.get("/urls", (req, res) => {
   if (!req.session['userId']) {
     return res.send("You need to login or register in order to see URLs");
@@ -71,6 +74,7 @@ app.get("/urls", (req, res) => {
     urls, };
   res.render("urls_index", templateVars);
 });
+
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
@@ -101,6 +105,7 @@ app.get("/urls/:id", (req, res) => {
   }
   res.render("urls_show", templateVars);
 });
+
 
 app.get("/u/:id", (req, res) => {
   if (!Object.keys(urlDatabase).includes(req.params.id)) {
