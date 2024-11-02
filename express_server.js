@@ -44,7 +44,10 @@ app.get("/", (req, res) => {
   const templateVars = {
     user: users[req.session.userId]
   };
-  res.send("Hello");
+  if (!templateVars.user) {
+    return res.redirect("/login");
+  }
+  res.redirect("/urls");
 });
 
 
@@ -162,7 +165,7 @@ app.post("/login", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-  req.session.userId = null;
+  req.session = null;
   res.redirect('/login');
 });
 
