@@ -4,6 +4,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
+!["Example of created URL"](https://github.com/MPNose/tinyapp/blob/main/docs/URL_example.png?raw=true)
 !["screenshot description"](#)
 !["screenshot description"](#)
 
